@@ -1,6 +1,6 @@
 function Carrito ({carrito, eliminarDelCarrito, vaciarCarrito, confirmarPedido, restarCantidad, agregarAlCarrito}){
 
-    const total = carrito.reduce((suma,item) => suma + item.precio, 0)
+    const total = carrito.reduce((suma,item) => suma + item.precio * item.cantidad, 0)
 
     return (
         <div className="carrito">
