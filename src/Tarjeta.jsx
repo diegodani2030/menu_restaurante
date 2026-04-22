@@ -20,7 +20,7 @@ function anima (){
             <p>Descripcion:{plato.descripción}</p>
             <p>Precio:{plato.precio}</p>
             <p>Categoria:{plato.categoria}</p>
-            <button onClick = {anima}> {agregado ? "agregado" : "agregar al carrito"}</button>
+            <button onClick = {anima}> {agregado ? "agregado" : "agregar orden"}</button>
             </div>
         </div>
     )

@@ -4,7 +4,7 @@ function Carrito ({carrito, eliminarDelCarrito, vaciarCarrito, confirmarPedido, 
 
     return (
         <div className="carrito">
-            <h2>Carrito</h2>
+            <h2>Orden</h2>
             <button className="pedir" onClick={() => confirmarPedido()}>Pedir</button>
             <ul>
                 {carrito.map((item,index)=> (
