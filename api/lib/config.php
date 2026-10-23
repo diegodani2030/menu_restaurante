@@ -1,9 +1,15 @@
 <?php
 
-function cargarEnv(string $archivo): void
+function configuracion(): array
 {
+    static $valores = null;
+    if ($valores !== null) {
+        return $valores;
+    }
+    $valores = [];
+    $archivo = dirname(__DIR__, 2) . '/.env';
     if (!is_file($archivo)) {
-        return;
+        return $valores;
     }
     foreach (file($archivo, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $linea) {
         $linea = trim($linea);
@@ -11,16 +17,16 @@ function cargarEnv(string $archivo): void
             continue;
         }
         [$clave, $valor] = array_map('trim', explode('=', $linea, 2));
-        if (getenv($clave) === false) {
-            putenv("$clave=$valor");
-        }
+        $valores[$clave] = $valor;
     }
+    return $valores;
 }
 
 function env(string $clave, string $porDefecto = ''): string
 {
-    $valor = getenv($clave);
-    return $valor === false || $valor === '' ? $porDefecto : $valor;
+    $valor = function_exists('getenv') ? getenv($clave) : false;
+    if ($valor === false || $valor === '') {
+        $valor = configuracion()[$clave] ?? '';
+    }
+    return $valor === '' ? $porDefecto : $valor;
 }
-
-cargarEnv(dirname(__DIR__, 2) . '/.env');

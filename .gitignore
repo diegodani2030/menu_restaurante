@@ -28,3 +28,6 @@ dist-ssr
 
 # Fotos subidas por los usuarios (datos, no código)
 uploads/
+
+# Paquete para subir a un hosting (se genera, no se versiona)
+despliegue/

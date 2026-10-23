@@ -77,6 +77,38 @@ Probado con XAMPP 8.2.12. La aplicación debe estar en la raíz del sitio, por e
 
 Después de cambiar el código de React, ejecute `npm run build` de nuevo.
 
+## Publicar en internet (hosting con PHP y MySQL, por ejemplo InfinityFree)
+
+Netlify, Vercel y similares no sirven: solo publican páginas estáticas, sin PHP ni MySQL.
+
+Se necesitan dos archivos, que se generan en la carpeta `despliegue/` (no se sube a git):
+
+- `raices-del-fogon-hosting.zip`: la página compilada (`dist/`), la API (`api/`), `.htaccess` y `.env.example`.
+- `instalacion_hosting.sql`: las tablas y el menú inicial, sin `CREATE DATABASE` ni `USE`, porque en un hosting la base de datos la crea el panel (también está en `database/instalacion_hosting.sql`).
+
+Pasos en InfinityFree:
+
+1. Cree la cuenta en https://www.infinityfree.com y un sitio con un subdominio gratuito (por ejemplo `raicesdelfogon.infinityfreeapp.com`). El sitio nuevo puede tardar unos minutos en estar disponible.
+2. En el panel, abra **MySQL Databases** y cree una base de datos. Anote el **servidor** (`sqlXXX.infinityfree.com`), el **usuario** (`if0_…`), el **nombre de la base** (`if0_…_algo`) y la **contraseña** (la de la cuenta de hosting, en **Account Details**).
+3. Pulse **phpMyAdmin** junto a esa base → pestaña **Importar** → elija `instalacion_hosting.sql` → **Continuar**.
+4. Abra el **File Manager** → carpeta `htdocs`. Borre los archivos de ejemplo que traiga, suba el ZIP y descomprímalo ahí, de modo que `htdocs` quede con `api/`, `dist/`, `.htaccess` y `.env.example`. Si el administrador no permite descomprimir, descomprima en su PC y suba el contenido con FileZilla (los datos FTP están en el panel).
+5. En `htdocs`, cree el archivo `.env` (copie `.env.example`) con los datos del paso 2:
+   ```
+   DB_HOST=sqlXXX.infinityfree.com
+   DB_PORT=3306
+   DB_USER=if0_XXXXXXXX
+   DB_PASSWORD=la contraseña de la cuenta de hosting
+   DB_NAME=if0_XXXXXXXX_raices
+   ```
+6. Abra la dirección del sitio: deben aparecer el menú y los filtros.
+7. Para tener un administrador: regístrese en la página con su correo y, en phpMyAdmin → pestaña **SQL**, ejecute (con su correo):
+   ```sql
+   UPDATE usuarios SET rol = 'admin' WHERE correo = 'su-correo@ejemplo.com';
+   ```
+   Cierre sesión y vuelva a entrar.
+
+Si aparece "La base de datos no está disponible", revise los datos del `.env`. Si la página sale en blanco o con "Not Found", falta el `.htaccess` (en el File Manager active la opción para ver archivos ocultos). Las fotos subidas en XAMPP no se pasan solas: copie la carpeta `uploads/` si las quiere en el hosting.
+
 ## Fotos de los platos
 
 El administrador puede subir la foto de cada plato (JPG, PNG o WEBP, máximo 2 MB) desde el formulario del plato. Las fotos se guardan en `uploads/platos/` (la carpeta se crea sola, no se sube a git e importa incluirla en las copias de seguridad) y su registro queda en la tabla `archivos`. El límite de 2 MB coincide con el valor por defecto de PHP, así que no hace falta modificar `php.ini`.
