@@ -1,8 +1,4 @@
 <?php
-// Instala la base de datos de Raíces del Fogón (se ejecuta desde la consola).
-//   php database/instalar.php          → crea BD, tablas, menú inicial y administrador
-//   php database/instalar.php --demo   → además agrega clientes y pedidos FICTICIOS de demostración
-// Es seguro ejecutarlo varias veces: no borra tablas ni datos existentes.
 
 declare(strict_types=1);
 
@@ -17,7 +13,6 @@ require dirname(__DIR__) . '/api/lib/validaciones.php';
 $conDemo = in_array('--demo', $argv, true);
 
 try {
-    // Conexión sin base de datos seleccionada: schema.sql la crea.
     $pdo = new PDO(
         sprintf('mysql:host=%s;port=%s;charset=utf8mb4', env('DB_HOST', '127.0.0.1'), env('DB_PORT', '3306')),
         env('DB_USER', 'root'),
@@ -31,8 +26,6 @@ try {
     }
     $pdo->exec('USE raices_del_fogon');
 
-    // Migración para bases de datos creadas antes de la subida de fotos:
-    // CREATE TABLE IF NOT EXISTS no modifica una tabla platos que ya existía.
     $columna = $pdo->query(
         "SELECT COUNT(*) FROM information_schema.COLUMNS
          WHERE TABLE_SCHEMA = 'raices_del_fogon' AND TABLE_NAME = 'platos' AND COLUMN_NAME = 'archivo_id'"
@@ -70,8 +63,6 @@ try {
     }
 
     if ($conDemo) {
-        // DATOS FICTICIOS DE DEMOSTRACIÓN: personas inventadas, correos con dominio
-        // .test (no existen) y contraseñas aleatorias que no se muestran.
         $ids = [];
         foreach ([
             ['nombre' => 'Cliente Demo Uno', 'correo' => 'cliente1@demo.test', 'telefono' => '3001112233'],

@@ -1,9 +1,3 @@
-// Reglas de validación del frontend (React). Son las mismas reglas que aplica
-// el servidor en api/lib/validaciones.php: React avisa al usuario antes de
-// enviar el formulario y PHP las vuelve a aplicar, porque nunca se confía solo
-// en el navegador.
-// Cada función devuelve { datos, errores }: datos ya limpios y un objeto con
-// un mensaje por cada campo inválido (vacío si todo está bien).
 export const ESTADOS_PEDIDO = ['pendiente', 'en_preparacion', 'entregado', 'cancelado']
 
 const REGEX_CORREO = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
@@ -143,9 +137,7 @@ export function validarPedido(entrada = {}) {
   return { datos, errores }
 }
 
-// Foto del plato (subida de archivo). Mismas reglas que api/lib/archivos.php;
-// el servidor además revisa el contenido real del archivo.
-export const MAX_BYTES_IMAGEN = 2 * 1024 * 1024 // 2 MB
+export const MAX_BYTES_IMAGEN = 2 * 1024 * 1024
 export const TIPOS_IMAGEN = ['image/jpeg', 'image/png', 'image/webp']
 
 export function validarImagen(archivo) {

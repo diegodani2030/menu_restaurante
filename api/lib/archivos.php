@@ -1,24 +1,8 @@
 <?php
-// Subida segura de fotos de platos.
-//
-// Medidas de seguridad:
-// - Lista blanca por tipo REAL: getimagesize() lee el contenido del archivo
-//   (no se confía en la extensión ni en el tipo que envía el navegador).
-// - La extensión con la que se guarda sale de la lista blanca, nunca del nombre
-//   original: un "foto.php" o "foto.jpg.php" jamás se guarda como .php.
-// - Nombre aleatorio de 32 caracteres (random_bytes): evita colisiones y que se
-//   adivinen o sobrescriban archivos.
-// - Los archivos solo se entregan por api/index.php con una ruta validada por
-//   expresión regular, por lo que nunca se ejecutan como código.
-//
-// Límite de tamaño: MAX_BYTES_IMAGEN coincide con el valor por defecto de PHP
-// (upload_max_filesize = 2M; post_max_size = 8M). Para fotos más grandes suba
-// esos valores en php.ini (post_max_size siempre mayor que upload_max_filesize),
-// reinicie el servidor y ajuste esta constante y la de src/utils/validaciones.js.
 
-const MAX_BYTES_IMAGEN = 2 * 1024 * 1024;  // 2 MB
-const MAX_LADO_IMAGEN = 6000;              // píxeles por lado
-const CARPETA_FOTOS = 'uploads/platos';    // relativa a la raíz del proyecto
+const MAX_BYTES_IMAGEN = 2 * 1024 * 1024;
+const MAX_LADO_IMAGEN = 6000;
+const CARPETA_FOTOS = 'uploads/platos';
 const TIPOS_IMAGEN = [
     'image/jpeg' => 'jpg',
     'image/png' => 'png',
@@ -30,7 +14,6 @@ function rutaAbsoluta(string $ruta): string
     return dirname(__DIR__, 2) . '/' . $ruta;
 }
 
-// Convierte valores del php.ini como "8M" o "2G" a bytes.
 function bytesIni(string $valor): int
 {
     $numero = (int) $valor;
@@ -42,11 +25,8 @@ function bytesIni(string $valor): int
     };
 }
 
-// Valida el archivo recibido en $_FILES[$campo], lo guarda en uploads/platos/
-// y devuelve los datos para registrarlo en la tabla archivos.
 function recibirImagen(string $campo): array
 {
-    // Si la petición supera post_max_size, PHP descarta todo y $_FILES llega vacío.
     $limitePost = bytesIni((string) ini_get('post_max_size'));
     if (empty($_FILES) && $limitePost > 0 && (int) ($_SERVER['CONTENT_LENGTH'] ?? 0) > $limitePost) {
         throw new ErrorApi(413, 'La foto es demasiado grande (máximo 2 MB).');
@@ -76,7 +56,6 @@ function recibirImagen(string $campo): array
         throw new ErrorApi(413, 'La foto debe pesar como máximo 2 MB.', ['imagen' => 'La foto debe pesar como máximo 2 MB.']);
     }
 
-    // getimagesize() devuelve false si el contenido no es una imagen real.
     $info = @getimagesize($archivo['tmp_name']);
     $mime = $info['mime'] ?? '';
     if (!$info || !isset(TIPOS_IMAGEN[$mime])) {
@@ -86,7 +65,6 @@ function recibirImagen(string $campo): array
         throw new ErrorApi(400, 'Las dimensiones de la foto no son válidas (máximo 6000 px por lado).', ['imagen' => 'Máximo 6000 px por lado.']);
     }
 
-    // Nombre original limpio: sin rutas ni caracteres de control (solo se guarda como dato).
     $original = basename(str_replace('\\', '/', (string) $archivo['name']));
     $original = preg_replace('/[\x00-\x1F\x7F]/u', '', $original) ?? '';
     $original = mb_substr($original, 0, 255) ?: 'foto';
@@ -113,7 +91,6 @@ function recibirImagen(string $campo): array
     ];
 }
 
-// Borra el archivo físico. Solo acepta rutas con el formato que genera recibirImagen().
 function borrarArchivoFisico(string $ruta): void
 {
     if (preg_match('#^uploads/platos/[a-f0-9]{32}\.(jpg|png|webp)$#', $ruta) && is_file(rutaAbsoluta($ruta))) {
@@ -121,8 +98,6 @@ function borrarArchivoFisico(string $ruta): void
     }
 }
 
-// Entrega una foto de uploads/platos/. La ruta se valida con una expresión
-// regular estricta, así no se puede pedir ningún otro archivo del servidor.
 function servirFoto(string $ruta): void
 {
     if (!preg_match('#^/uploads/platos/([a-f0-9]{32})\.(jpg|png|webp)$#', $ruta, $partes)
@@ -135,7 +110,6 @@ function servirFoto(string $ruta): void
     $tipos = ['jpg' => 'image/jpeg', 'png' => 'image/png', 'webp' => 'image/webp'];
     header('Content-Type: ' . $tipos[$partes[2]]);
     header('Content-Length: ' . filesize(rutaAbsoluta(ltrim($ruta, '/'))));
-    // El nombre es aleatorio y nunca se reutiliza: el navegador puede guardarla en caché.
     header('Cache-Control: public, max-age=31536000, immutable');
     readfile(rutaAbsoluta(ltrim($ruta, '/')));
     exit;

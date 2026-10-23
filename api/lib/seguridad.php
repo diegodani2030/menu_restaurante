@@ -1,11 +1,7 @@
 <?php
-// Sesiones, contraseñas y permisos.
-// - Las contraseñas se guardan con password_hash() (bcrypt), nunca en texto plano.
-// - La sesión usa la sesión nativa de PHP con una cookie httpOnly y SameSite=Strict:
-//   el JavaScript del navegador no puede leerla y no se envía desde otros sitios.
 
 const NOMBRE_COOKIE = 'rf_sesion';
-const DURACION_SESION = 8 * 60 * 60; // 8 horas
+const DURACION_SESION = 8 * 60 * 60;
 
 function iniciarSesionPhp(): void
 {
@@ -26,9 +22,6 @@ function iniciarSesionPhp(): void
     session_start();
 }
 
-// Devuelve ['id' => ..., 'rol' => ...] si hay una sesión válida, o null.
-// Solo se abre la sesión si el navegador envió la cookie (los visitantes
-// anónimos no generan archivos de sesión).
 function sesionActual(): ?array
 {
     static $sesion = false;
@@ -48,7 +41,7 @@ function sesionActual(): ?array
 function guardarSesion(array $usuario): void
 {
     iniciarSesionPhp();
-    session_regenerate_id(true); // nuevo identificador al iniciar sesión (evita fijación de sesión)
+    session_regenerate_id(true);
     $_SESSION['usuario_id'] = (int) $usuario['id'];
     $_SESSION['rol'] = $usuario['rol'];
     $_SESSION['expira'] = time() + DURACION_SESION;

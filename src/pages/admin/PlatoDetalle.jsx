@@ -4,7 +4,6 @@ import Aviso from '../../components/Aviso'
 import { api } from '../../services/api'
 import { precio, fecha } from '../../utils/formato'
 
-// Consulta individual de un plato por su identificador.
 function PlatoDetalle() {
   const { id } = useParams()
   const navegar = useNavigate()

@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { api } from '../services/api'
 import { SesionContext } from './sesion'
 
-// Guarda el usuario que inició sesión y lo comparte con toda la aplicación.
 function SesionProvider({ children }) {
   const [usuario, setUsuario] = useState(null)
   const [cargando, setCargando] = useState(true)

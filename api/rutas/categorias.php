@@ -1,8 +1,5 @@
 <?php
-// CRUD de categorías. Consultar es público; crear, editar y eliminar es solo del administrador.
 
-// Consulta multitabla: categorías con la cantidad de platos (LEFT JOIN para
-// incluir también las categorías que aún no tienen platos).
 const SQL_CATEGORIAS = '
   SELECT c.id, c.nombre, c.descripcion, c.creado_en,
          COUNT(p.id) AS total_platos,

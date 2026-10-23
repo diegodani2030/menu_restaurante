@@ -19,7 +19,6 @@ function Menu({ carrito, pedidoConfirmado, ...accionesCarrito }) {
     api.categorias().then(setCategorias).catch(() => setCategorias([]))
   }, [])
 
-  // Consulta a la API cada vez que cambia la categoría o el texto de búsqueda
   useEffect(() => {
     let vigente = true
     const espera = setTimeout(() => {

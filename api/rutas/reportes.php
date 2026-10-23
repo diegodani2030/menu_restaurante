@@ -1,6 +1,4 @@
 <?php
-// Consultas de resumen (conteos, totales y promedios) para el panel del administrador.
-// Los pedidos cancelados no cuentan como ventas.
 
 ruta('GET', '/reportes/resumen', function () {
     requiereAdmin();

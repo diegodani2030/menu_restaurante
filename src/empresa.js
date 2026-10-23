@@ -1,8 +1,3 @@
-// Identidad corporativa de Raíces del Fogón.
-// PROPUESTA PENDIENTE DE VALIDACIÓN POR EL EQUIPO: estos textos fueron
-// redactados a partir del concepto del proyecto y deben ser revisados y
-// aprobados antes de considerarse oficiales.
-
 const empresa = {
   nombre: 'Raíces del Fogón',
   lema: 'Sabores de nuestra tierra, cocinados con tradición',
@@ -43,8 +38,6 @@ const empresa = {
     { nombre: 'Seguimiento del pedido', descripcion: 'Consulte en "Mis pedidos" si su orden está pendiente, en preparación o entregada.' },
   ],
 
-  // Datos de contacto: PENDIENTES. Complete los valores reales del negocio.
-  // Mientras estén vacíos, la sección de contacto no se muestra en la página.
   contacto: {
     direccion: '',
     telefono: '',

@@ -1,7 +1,3 @@
-// Servicio único de comunicación con la API (PHP + MySQL).
-// La sesión viaja en una cookie httpOnly, por eso no se guarda ningún token
-// en el navegador ni en el código.
-
 export class ErrorApi extends Error {
   constructor(mensaje, estado, campos) {
     super(mensaje)
@@ -11,8 +7,6 @@ export class ErrorApi extends Error {
 }
 
 async function pedir(metodo, ruta, cuerpo) {
-  // Con FormData (subida de archivos) no se fija Content-Type: el navegador
-  // pone multipart/form-data con su "boundary" automáticamente.
   const esFormulario = cuerpo instanceof FormData
   let respuesta
   try {
@@ -45,19 +39,16 @@ function consulta(filtros = {}) {
 }
 
 export const api = {
-  // Sesión
   sesion: () => pedir('GET', '/auth/sesion'),
   registrar: (datos) => pedir('POST', '/auth/registro', datos),
   iniciarSesion: (datos) => pedir('POST', '/auth/login', datos),
   cerrarSesion: () => pedir('POST', '/auth/logout'),
 
-  // Categorías
   categorias: () => pedir('GET', '/categorias'),
   crearCategoria: (datos) => pedir('POST', '/categorias', datos),
   editarCategoria: (id, datos) => pedir('PUT', `/categorias/${id}`, datos),
   eliminarCategoria: (id) => pedir('DELETE', `/categorias/${id}`),
 
-  // Platos
   platos: (filtros) => pedir('GET', `/platos${consulta(filtros)}`),
   plato: (id) => pedir('GET', `/platos/${id}`),
   crearPlato: (datos) => pedir('POST', '/platos', datos),
@@ -70,13 +61,11 @@ export const api = {
   },
   quitarFotoPlato: (id) => pedir('DELETE', `/platos/${id}/imagen`),
 
-  // Pedidos
   pedidos: (filtros) => pedir('GET', `/pedidos${consulta(filtros)}`),
   pedido: (id) => pedir('GET', `/pedidos/${id}`),
   crearPedido: (datos) => pedir('POST', '/pedidos', datos),
   cambiarEstado: (id, estado) => pedir('PATCH', `/pedidos/${id}/estado`, { estado }),
   cancelarPedido: (id) => pedir('PATCH', `/pedidos/${id}/cancelar`),
 
-  // Reportes
   resumen: () => pedir('GET', '/reportes/resumen'),
 }

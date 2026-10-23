@@ -1,7 +1,5 @@
 <?php
-// Respuestas JSON y manejo centralizado de errores.
 
-// Error controlado: su mensaje sí se muestra al usuario.
 class ErrorApi extends Exception
 {
     public function __construct(public int $estado, string $mensaje, public ?array $campos = null)
@@ -18,7 +16,6 @@ function responder(mixed $datos, int $estado = 200): never
     exit;
 }
 
-// Cuerpo JSON de la petición como arreglo asociativo.
 function cuerpo(): array
 {
     static $datos = null;
@@ -36,8 +33,6 @@ function cuerpo(): array
     return $datos;
 }
 
-// Aplica una función de validaciones.php y lanza un error 400 con el
-// detalle por campo si los datos no son válidos.
 function validar(callable $validador, array $entrada): array
 {
     [$datos, $errores] = $validador($entrada);
@@ -47,7 +42,6 @@ function validar(callable $validador, array $entrada): array
     return $datos;
 }
 
-// Convierte el :id de la URL en número o responde 404.
 function idValido(string $valor): int
 {
     if (!ctype_digit($valor) || (int) $valor <= 0) {
@@ -56,9 +50,6 @@ function idValido(string $valor): int
     return (int) $valor;
 }
 
-// Traduce errores conocidos de MySQL a mensajes comprensibles.
-// Cualquier otro error se registra en el log del servidor y al cliente
-// solo le llega un mensaje genérico (no se exponen detalles internos).
 function manejarError(Throwable $error): never
 {
     if ($error instanceof ErrorApi) {
@@ -77,15 +68,13 @@ function manejarError(Throwable $error): never
                 responder(['error' => 'No se puede eliminar porque tiene registros relacionados.'], 409);
             case 1452:
                 responder(['error' => 'El registro relacionado no existe.'], 400);
-            case 1045: // acceso denegado
-            case 1049: // base de datos inexistente
-            case 2002: // servidor apagado
+            case 1045:
+            case 1049:
+            case 2002:
                 error_log('[BD] ' . $error->getMessage());
                 responder(['error' => 'La base de datos no está disponible. Intente más tarde.'], 503);
         }
     }
-    // Solo se registran datos seguros: no la traza completa, que podría incluir
-    // argumentos de funciones como contraseñas.
     error_log(sprintf('[API] %s: %s en %s:%d', get_class($error), $error->getMessage(), $error->getFile(), $error->getLine()));
     responder(['error' => 'Ocurrió un error inesperado en el servidor.'], 500);
 }

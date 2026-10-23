@@ -1,11 +1,3 @@
--- =====================================================================
--- Raíces del Fogón — Datos iniciales del menú (DML)
--- Son los mismos platos que tenía la versión anterior en src/platos.js.
--- INSERT IGNORE evita duplicados si el script se ejecuta varias veces.
--- Los usuarios NO se insertan aquí: sus contraseñas deben guardarse como
--- hash, por eso los crea el script database/instalar.php.
--- =====================================================================
-
 USE raices_del_fogon;
 
 INSERT IGNORE INTO categorias (nombre, descripcion) VALUES

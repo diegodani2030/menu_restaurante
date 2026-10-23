@@ -7,8 +7,6 @@ function Navbar({ cantidadOrden }) {
   const [abierto, setAbierto] = useState(false)
   const navegar = useNavigate()
 
-  // Primero se sale de la página actual: si era una página protegida, así no
-  // redirige al inicio de sesión al quedar sin usuario.
   async function salir() {
     setAbierto(false)
     navegar('/')

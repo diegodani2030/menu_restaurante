@@ -6,9 +6,6 @@ import { precio } from '../../utils/formato'
 
 const FILTROS_INICIALES = { buscar: '', categoria_id: '', disponible: '', precio_min: '', precio_max: '', orden: '', dir: 'asc' }
 
-// Módulo principal con CRUD completo: listado con búsqueda, filtros combinados
-// y orden (Read), enlaces a crear y editar (Create / Update) y eliminación con
-// confirmación (Delete).
 function AdminPlatos() {
   const ubicacion = useLocation()
   const [filtros, setFiltros] = useState(FILTROS_INICIALES)

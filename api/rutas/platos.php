@@ -1,9 +1,5 @@
 <?php
-// CRUD de platos (módulo principal). Consultar es público; crear, editar y
-// eliminar es solo del administrador.
 
-// Lista blanca de columnas para ORDER BY: el nombre de una columna no puede
-// ir como marcador "?", por eso solo se aceptan estos valores.
 const ORDENES_PLATOS = [
     'nombre' => 'p.nombre',
     'precio' => 'p.precio',
@@ -11,9 +7,6 @@ const ORDENES_PLATOS = [
     'fecha' => 'p.creado_en',
 ];
 
-// Consulta multitabla: cada plato con el nombre de su categoría (INNER JOIN) y su
-// foto subida, si tiene (LEFT JOIN). "imagen" es la foto que se muestra: la subida
-// al servidor o, si no hay, la URL externa.
 const SQL_PLATOS = "
   SELECT p.id, p.nombre, p.descripcion, p.precio, p.imagen_url, p.disponible,
          p.categoria_id, c.nombre AS categoria, p.creado_en, p.actualizado_en,
@@ -36,8 +29,6 @@ function buscarPlato(int $id): ?array
     return $plato ? formatoPlato($plato) : null;
 }
 
-// GET /api/platos?buscar=&categoria_id=&disponible=&precio_min=&precio_max=&orden=&dir=
-// Los visitantes y clientes solo ven platos disponibles; el administrador ve todos.
 ruta('GET', '/platos', function () {
     $condiciones = [];
     $parametros = [];
@@ -76,7 +67,6 @@ ruta('GET', '/platos', function () {
     responder(array_map('formatoPlato', $platos));
 });
 
-// Consulta individual con estadísticas de venta (JOIN con detalle_pedido y pedidos).
 ruta('GET', '/platos/{id}', function (string $id) {
     $plato = buscarPlato(idValido($id));
     if (!$plato || (!$plato['disponible'] && !esAdmin())) {
@@ -124,8 +114,6 @@ ruta('DELETE', '/platos/{id}', function (string $id) {
     if ($uso['total'] > 0) {
         throw new ErrorApi(409, 'Este plato ya aparece en pedidos, por eso no se puede eliminar. Márquelo como "no disponible" para ocultarlo del menú.');
     }
-    // Se borran el plato y el registro de su foto en una transacción;
-    // el archivo físico se borra solo cuando la base de datos confirmó el cambio.
     $foto = transaccion(function () use ($id) {
         $foto = consultarUno(
             'SELECT a.id, a.ruta FROM platos p INNER JOIN archivos a ON a.id = p.archivo_id WHERE p.id = ?',
@@ -145,7 +133,6 @@ ruta('DELETE', '/platos/{id}', function (string $id) {
     responder(['mensaje' => 'Plato eliminado.']);
 });
 
-// Sube (o reemplaza) la foto de un plato. Petición multipart/form-data con el campo "imagen".
 ruta('POST', '/platos/{id}/imagen', function (string $id) {
     requiereAdmin();
     $id = idValido($id);
@@ -153,7 +140,7 @@ ruta('POST', '/platos/{id}/imagen', function (string $id) {
         throw new ErrorApi(404, 'El plato no existe.');
     }
 
-    $nueva = recibirImagen('imagen'); // valida y guarda el archivo físico
+    $nueva = recibirImagen('imagen');
     try {
         $anterior = transaccion(function () use ($id, $nueva) {
             $anterior = consultarUno(
@@ -171,16 +158,15 @@ ruta('POST', '/platos/{id}/imagen', function (string $id) {
             return $anterior;
         });
     } catch (Throwable $error) {
-        borrarArchivoFisico($nueva['ruta']); // no dejar archivos huérfanos si falla la base de datos
+        borrarArchivoFisico($nueva['ruta']);
         throw $error;
     }
     if ($anterior) {
-        borrarArchivoFisico($anterior['ruta']); // la foto reemplazada ya no se usa
+        borrarArchivoFisico($anterior['ruta']);
     }
     responder(buscarPlato($id), 201);
 });
 
-// Quita la foto subida de un plato (si tiene URL externa, vuelve a mostrarse esa).
 ruta('DELETE', '/platos/{id}/imagen', function (string $id) {
     requiereAdmin();
     $id = idValido($id);
@@ -192,7 +178,6 @@ ruta('DELETE', '/platos/{id}/imagen', function (string $id) {
         throw new ErrorApi(404, 'El plato no tiene una foto subida.');
     }
     $foto = consultarUno('SELECT ruta FROM archivos WHERE id = ?', [$plato['archivo_id']]);
-    // ON DELETE SET NULL deja platos.archivo_id en NULL automáticamente
     ejecutar('DELETE FROM archivos WHERE id = ?', [$plato['archivo_id']]);
     if ($foto) {
         borrarArchivoFisico($foto['ruta']);

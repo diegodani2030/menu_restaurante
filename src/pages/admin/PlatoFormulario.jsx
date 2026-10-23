@@ -7,9 +7,6 @@ import { validarPlato, validarImagen, tieneErrores } from '../../utils/validacio
 
 const VACIO = { nombre: '', descripcion: '', precio: '', categoria_id: '', imagen_url: '', disponible: true }
 
-// Formulario de creación (/admin/platos/nuevo) y edición (/admin/platos/:id/editar).
-// La foto se puede subir desde el equipo o indicar como URL externa; si hay
-// las dos, el menú muestra la foto subida.
 function PlatoFormulario() {
   const { id } = useParams()
   const editando = Boolean(id)
@@ -24,12 +21,10 @@ function PlatoFormulario() {
   const [noExiste, setNoExiste] = useState(false)
   const [enviando, setEnviando] = useState(false)
 
-  // Foto: la ya guardada en el servidor y la nueva elegida en el equipo
-  const [fotoGuardada, setFotoGuardada] = useState(null) // { imagen, archivo_nombre }
+  const [fotoGuardada, setFotoGuardada] = useState(null)
   const [archivoFoto, setArchivoFoto] = useState(null)
   const [vistaPrevia, setVistaPrevia] = useState('')
   const [quitandoFoto, setQuitandoFoto] = useState(false)
-  // El value de un <input type="file"> no se puede asignar desde React; la ref sirve para limpiarlo.
   const inputFoto = useRef(null)
 
   useEffect(() => {
@@ -50,7 +45,6 @@ function PlatoFormulario() {
       .finally(() => setCargando(false))
   }, [id, editando])
 
-  // Vista previa local de la foto elegida (se libera la memoria al cambiarla)
   useEffect(() => {
     if (!archivoFoto) {
       setVistaPrevia('')
@@ -121,7 +115,6 @@ function PlatoFormulario() {
       return
     }
 
-    // El plato ya está guardado; ahora se sube la foto, si se eligió una.
     if (archivoFoto) {
       try {
         await api.subirFotoPlato(plato.id, archivoFoto)
@@ -130,7 +123,6 @@ function PlatoFormulario() {
         setErrores((actual) => ({ ...actual, ...e.campos }))
         const aviso = `Se guardaron los datos de "${plato.nombre}", pero la foto no se pudo subir: ${e.message}`
         setErrorGeneral(aviso)
-        // Si era un plato nuevo, se pasa a modo edición para reintentar solo la foto
         if (!editando) navegar(`/admin/platos/${plato.id}/editar`, { replace: true, state: { error: aviso } })
         return
       }
@@ -152,7 +144,6 @@ function PlatoFormulario() {
   }
 
   const urlValida = valores.imagen_url && !errores.imagen_url && /^https?:\/\//i.test(valores.imagen_url)
-  // Misma prioridad que el menú: foto nueva > foto subida > URL externa
   const fotoMostrada = vistaPrevia || fotoGuardada?.imagen || (urlValida ? valores.imagen_url : '')
 
   return (

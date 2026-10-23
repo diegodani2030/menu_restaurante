@@ -51,8 +51,6 @@ function vaciarCarrito() {
   setcarrito(newCarrito)
 }
 
-// Envía la orden a la API. Si no hay sesión, lleva al inicio de sesión y
-// conserva la orden para enviarla al volver.
 async function confirmarPedido (observaciones) {
 
   if (!usuario) {

@@ -1,9 +1,4 @@
 <?php
-// Punto de entrada único de la API REST de Raíces del Fogón (PHP + MySQL).
-//
-// Desarrollo:  php -S 127.0.0.1:3001 api/index.php   (Vite reenvía /api y /uploads aquí)
-// Producción:  después de `npm run build`, este mismo archivo sirve también
-//              el frontend React compilado (carpeta dist/) y las fotos subidas.
 
 declare(strict_types=1);
 
@@ -14,29 +9,26 @@ require __DIR__ . '/lib/seguridad.php';
 require __DIR__ . '/lib/validaciones.php';
 require __DIR__ . '/lib/archivos.php';
 
-ini_set('display_errors', '0'); // los errores van al log, nunca a la respuesta
-ini_set('zend.exception_ignore_args', '1'); // las trazas de error no guardan argumentos (p. ej. contraseñas)
+ini_set('display_errors', '0');
+ini_set('zend.exception_ignore_args', '1');
 set_error_handler(function (int $nivel, string $mensaje, string $archivo, int $linea) {
     if (!(error_reporting() & $nivel)) {
-        return false; // aviso silenciado a propósito con @ (por ejemplo, @getimagesize)
+        return false;
     }
     throw new ErrorException($mensaje, 0, $nivel, $archivo, $linea);
 });
 set_exception_handler('manejarError');
 
-// Cabeceras básicas de seguridad
 header_remove('X-Powered-By');
 header('X-Content-Type-Options: nosniff');
 header('X-Frame-Options: DENY');
 header('Referrer-Policy: same-origin');
 
-// ---------- Enrutador mínimo ----------
 $RUTAS = [];
 
 function ruta(string $metodo, string $patron, callable $accion): void
 {
     global $RUTAS;
-    // '/platos/{id}' se convierte en la expresión regular '#^/platos/([^/]+)$#'
     $regex = '#^' . preg_replace('#\{\w+\}#', '([^/]+)', $patron) . '$#';
     $RUTAS[] = [$metodo, $regex, $accion];
 }
@@ -76,10 +68,6 @@ responder(
     $rutaExiste ? 405 : 404
 );
 
-// ---------- Frontend React compilado (dist/) ----------
-// Solo entrega archivos que estén dentro de dist/; cualquier otra ruta recibe
-// index.html para que React Router resuelva la página. Así nunca se exponen
-// archivos del proyecto como .env o el código PHP.
 function servirFrontend(string $ruta): never
 {
     $dist = realpath(dirname(__DIR__) . '/dist');

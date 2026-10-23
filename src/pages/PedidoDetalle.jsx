@@ -7,8 +7,6 @@ import { api } from '../services/api'
 import { precio, fecha, NOMBRES_ESTADO } from '../utils/formato'
 import { ESTADOS_PEDIDO } from '../utils/validaciones'
 
-// Detalle de un pedido (consulta multitabla: pedido + cliente + platos + categorías).
-// El cliente puede cancelarlo si está pendiente; el administrador cambia su estado.
 function PedidoDetalle() {
   const { id } = useParams()
   const { esAdmin } = useSesion()

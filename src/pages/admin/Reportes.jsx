@@ -3,7 +3,6 @@ import Aviso from '../../components/Aviso'
 import { api } from '../../services/api'
 import { precio, NOMBRES_ESTADO } from '../../utils/formato'
 
-// Consultas de resumen: conteos, totales, promedios y platos más vendidos.
 function Reportes() {
   const [datos, setDatos] = useState(null)
   const [error, setError] = useState('')

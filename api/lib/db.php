@@ -1,7 +1,4 @@
 <?php
-// Conexión a MySQL con PDO.
-// Todas las consultas usan sentencias preparadas (marcadores "?"), así los
-// datos del usuario nunca se concatenan al SQL (evita la inyección SQL).
 
 function conexion(): PDO
 {
@@ -16,13 +13,12 @@ function conexion(): PDO
         $pdo = new PDO($dsn, env('DB_USER', 'root'), env('DB_PASSWORD'), [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-            PDO::ATTR_EMULATE_PREPARES => false, // preparación real en el servidor MySQL
+            PDO::ATTR_EMULATE_PREPARES => false,
         ]);
     }
     return $pdo;
 }
 
-// Ejecuta una consulta SELECT y devuelve todas las filas.
 function consultar(string $sql, array $parametros = []): array
 {
     $sentencia = conexion()->prepare($sql);
@@ -30,13 +26,11 @@ function consultar(string $sql, array $parametros = []): array
     return $sentencia->fetchAll();
 }
 
-// Devuelve la primera fila o null.
 function consultarUno(string $sql, array $parametros = []): ?array
 {
     return consultar($sql, $parametros)[0] ?? null;
 }
 
-// Ejecuta INSERT, UPDATE o DELETE y devuelve el número de filas afectadas.
 function ejecutar(string $sql, array $parametros = []): int
 {
     $sentencia = conexion()->prepare($sql);
@@ -49,7 +43,6 @@ function ultimoId(): int
     return (int) conexion()->lastInsertId();
 }
 
-// Ejecuta varias operaciones en una transacción: si una falla, se revierten todas.
 function transaccion(callable $trabajo): mixed
 {
     $pdo = conexion();
@@ -64,7 +57,6 @@ function transaccion(callable $trabajo): mixed
     }
 }
 
-// MySQL devuelve DECIMAL como texto: se convierte a número para el frontend.
 function numero(mixed $valor): int|float
 {
     $numero = (float) $valor;

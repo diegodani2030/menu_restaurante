@@ -1,8 +1,6 @@
 import { Navigate, useLocation } from 'react-router-dom'
 import { useSesion } from '../context/sesion'
 
-// Restringe una página a usuarios con sesión (o solo administradores).
-// Es una ayuda de navegación: la protección real la aplica la API.
 function RutaProtegida({ soloAdmin = false, children }) {
   const { usuario, cargando } = useSesion()
   const ubicacion = useLocation()

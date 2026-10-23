@@ -1,5 +1,4 @@
 <?php
-// Pedidos: los crea el cliente; el administrador los consulta y cambia su estado.
 
 function formatoPedido(array $p): array
 {
@@ -11,9 +10,6 @@ function formatoPedido(array $p): array
     return $p;
 }
 
-// Crea un pedido con su detalle dentro de una transacción.
-// Los precios se toman de la base de datos, no del navegador, para que el
-// cliente no pueda modificar el valor a pagar.
 ruta('POST', '/pedidos', function () {
     $sesion = requiereSesion();
     $datos = validar('validarPedido', cuerpo());
@@ -48,9 +44,6 @@ ruta('POST', '/pedidos', function () {
     responder($pedido, 201);
 });
 
-// Consulta multitabla: pedidos con los datos del cliente (usuarios) y la
-// cantidad de platos (detalle_pedido).
-// El administrador ve todos los pedidos y puede filtrar; el cliente solo los suyos.
 ruta('GET', '/pedidos', function () {
     $sesion = requiereSesion();
     $condiciones = [];
@@ -105,14 +98,12 @@ function buscarPedido(int $id, array $sesion): array
          WHERE pe.id = ?',
         [$id]
     );
-    // Un cliente no puede ver pedidos ajenos: se responde 404 para no revelar que existen.
     if (!$pedido || ($sesion['rol'] !== 'admin' && (int) $pedido['usuario_id'] !== $sesion['id'])) {
         throw new ErrorApi(404, 'El pedido no existe.');
     }
     return formatoPedido($pedido);
 }
 
-// Consulta multitabla de 5 tablas: pedido + cliente + detalle + plato + categoría.
 ruta('GET', '/pedidos/{id}', function (string $id) {
     $pedido = buscarPedido(idValido($id), requiereSesion());
     $detalle = consultar(
@@ -132,7 +123,6 @@ ruta('GET', '/pedidos/{id}', function (string $id) {
     responder($pedido);
 });
 
-// El administrador cambia el estado del pedido.
 ruta('PATCH', '/pedidos/{id}/estado', function (string $id) {
     requiereAdmin();
     $id = idValido($id);
@@ -147,7 +137,6 @@ ruta('PATCH', '/pedidos/{id}/estado', function (string $id) {
     responder(['id' => $id, 'estado' => $estado]);
 });
 
-// El cliente puede cancelar su propio pedido mientras siga pendiente.
 ruta('PATCH', '/pedidos/{id}/cancelar', function (string $id) {
     $pedido = buscarPedido(idValido($id), requiereSesion());
     if ($pedido['estado'] !== 'pendiente') {

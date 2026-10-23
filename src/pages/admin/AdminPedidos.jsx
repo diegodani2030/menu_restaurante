@@ -8,8 +8,6 @@ import { ESTADOS_PEDIDO } from '../../utils/validaciones'
 
 const FILTROS_INICIALES = { buscar: '', estado: '', desde: '', hasta: '' }
 
-// Consulta multitabla de pedidos con su cliente, con filtros por cliente,
-// estado y rango de fechas.
 function AdminPedidos() {
   const [filtros, setFiltros] = useState(FILTROS_INICIALES)
   const [pedidos, setPedidos] = useState([])

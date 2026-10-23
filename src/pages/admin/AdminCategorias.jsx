@@ -6,8 +6,6 @@ import { validarCategoria, tieneErrores } from '../../utils/validaciones'
 
 const VACIO = { nombre: '', descripcion: '' }
 
-// CRUD de categorías en una sola página: el formulario sirve para crear y,
-// al pulsar "Editar", para modificar la categoría seleccionada.
 function AdminCategorias() {
   const [categorias, setCategorias] = useState([])
   const [valores, setValores] = useState(VACIO)

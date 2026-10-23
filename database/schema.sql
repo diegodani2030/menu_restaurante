@@ -1,20 +1,9 @@
--- =====================================================================
--- Raíces del Fogón — Script de creación de la base de datos (DDL)
--- Motor: MySQL 8.x · Almacenamiento: InnoDB · Juego de caracteres: utf8mb4
---
--- El script NO es destructivo: usa CREATE ... IF NOT EXISTS y no borra
--- tablas ni datos existentes. Se puede ejecutar varias veces.
--- =====================================================================
-
 CREATE DATABASE IF NOT EXISTS raices_del_fogon
   CHARACTER SET utf8mb4
   COLLATE utf8mb4_spanish_ci;
 
 USE raices_del_fogon;
 
--- ---------------------------------------------------------------------
--- categorias: agrupa los platos del menú (Entrada, Plato fuerte, Postre…)
--- ---------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS categorias (
   id           INT UNSIGNED  NOT NULL AUTO_INCREMENT,
   nombre       VARCHAR(50)   NOT NULL,
@@ -24,11 +13,6 @@ CREATE TABLE IF NOT EXISTS categorias (
   CONSTRAINT uq_categorias_nombre UNIQUE (nombre)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
 
--- ---------------------------------------------------------------------
--- archivos: fotos subidas al servidor (carpeta uploads/platos/).
--- El archivo físico se guarda con un nombre aleatorio (nombre_sistema);
--- aquí queda el registro con su nombre original, ruta, tipo y tamaño.
--- ---------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS archivos (
   id               INT UNSIGNED  NOT NULL AUTO_INCREMENT,
   nombre_original  VARCHAR(255)  NOT NULL,
@@ -42,13 +26,6 @@ CREATE TABLE IF NOT EXISTS archivos (
   CONSTRAINT ck_archivos_tamano CHECK (tamano_bytes > 0)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
 
--- ---------------------------------------------------------------------
--- platos: productos que ofrece el restaurante.
--- Relaciones: categorias 1 ─── N platos
---             archivos   1 ─── 0..1 platos (foto subida, opcional)
--- La foto puede ser un archivo subido (archivo_id) o una URL externa
--- (imagen_url); si existen las dos, se muestra el archivo subido.
--- ---------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS platos (
   id              INT UNSIGNED   NOT NULL AUTO_INCREMENT,
   categoria_id    INT UNSIGNED   NOT NULL,
@@ -66,20 +43,16 @@ CREATE TABLE IF NOT EXISTS platos (
   CONSTRAINT fk_platos_categoria FOREIGN KEY (categoria_id)
     REFERENCES categorias (id)
     ON UPDATE CASCADE
-    ON DELETE RESTRICT,           -- no se puede borrar una categoría con platos
-  CONSTRAINT uq_platos_archivo UNIQUE (archivo_id),  -- cada foto pertenece a un solo plato
+    ON DELETE RESTRICT,
+  CONSTRAINT uq_platos_archivo UNIQUE (archivo_id),
   CONSTRAINT fk_platos_archivo FOREIGN KEY (archivo_id)
     REFERENCES archivos (id)
     ON UPDATE CASCADE
-    ON DELETE SET NULL,           -- si se borra la foto, el plato queda sin foto subida
+    ON DELETE SET NULL,
   INDEX ix_platos_categoria (categoria_id),
   INDEX ix_platos_disponible (disponible)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
 
--- ---------------------------------------------------------------------
--- usuarios: clientes y administradores del sistema.
--- La contraseña se guarda como hash scrypt (nunca en texto plano).
--- ---------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS usuarios (
   id             INT UNSIGNED  NOT NULL AUTO_INCREMENT,
   nombre         VARCHAR(100)  NOT NULL,
@@ -92,11 +65,6 @@ CREATE TABLE IF NOT EXISTS usuarios (
   CONSTRAINT uq_usuarios_correo UNIQUE (correo)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
 
--- ---------------------------------------------------------------------
--- intentos_login: intentos fallidos de inicio de sesión. Sirve para frenar
--- ataques de fuerza bruta (probar muchas contraseñas). No tiene llave
--- foránea a propósito: también registra correos que no existen.
--- ---------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS intentos_login (
   id         INT UNSIGNED  NOT NULL AUTO_INCREMENT,
   correo     VARCHAR(150)  NOT NULL,
@@ -107,10 +75,6 @@ CREATE TABLE IF NOT EXISTS intentos_login (
   INDEX ix_intentos_ip (ip, creado_en)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
 
--- ---------------------------------------------------------------------
--- pedidos: encabezado de cada orden realizada por un usuario.
--- Relación: usuarios 1 ─── N pedidos
--- ---------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS pedidos (
   id             INT UNSIGNED   NOT NULL AUTO_INCREMENT,
   usuario_id     INT UNSIGNED   NOT NULL,
@@ -124,19 +88,12 @@ CREATE TABLE IF NOT EXISTS pedidos (
   CONSTRAINT fk_pedidos_usuario FOREIGN KEY (usuario_id)
     REFERENCES usuarios (id)
     ON UPDATE CASCADE
-    ON DELETE RESTRICT,           -- se conserva el historial de pedidos
+    ON DELETE RESTRICT,
   INDEX ix_pedidos_usuario (usuario_id),
   INDEX ix_pedidos_estado (estado),
   INDEX ix_pedidos_fecha (creado_en)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
 
--- ---------------------------------------------------------------------
--- detalle_pedido: platos incluidos en cada pedido (tabla intermedia).
--- Relaciones: pedidos 1 ─── N detalle_pedido N ─── 1 platos
--- (resuelve la relación muchos a muchos entre pedidos y platos)
--- El precio_unitario se copia del plato en el momento de la compra para
--- que los cambios de precio no alteren pedidos anteriores.
--- ---------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS detalle_pedido (
   id               INT UNSIGNED       NOT NULL AUTO_INCREMENT,
   pedido_id        INT UNSIGNED       NOT NULL,
@@ -151,10 +108,10 @@ CREATE TABLE IF NOT EXISTS detalle_pedido (
   CONSTRAINT fk_detalle_pedido FOREIGN KEY (pedido_id)
     REFERENCES pedidos (id)
     ON UPDATE CASCADE
-    ON DELETE CASCADE,            -- el detalle depende de su pedido
+    ON DELETE CASCADE,
   CONSTRAINT fk_detalle_plato FOREIGN KEY (plato_id)
     REFERENCES platos (id)
     ON UPDATE CASCADE
-    ON DELETE RESTRICT,           -- no se borra un plato que ya fue vendido
+    ON DELETE RESTRICT,
   INDEX ix_detalle_plato (plato_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;

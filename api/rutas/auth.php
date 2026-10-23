@@ -1,5 +1,4 @@
 <?php
-// Registro, inicio y cierre de sesión.
 
 function usuarioPublico(int $id): ?array
 {
@@ -10,8 +9,6 @@ function usuarioPublico(int $id): ?array
     return $usuario;
 }
 
-// Registro de clientes nuevos. El rol siempre es "cliente": un usuario no
-// puede registrarse a sí mismo como administrador.
 ruta('POST', '/auth/registro', function () {
     $datos = validar('validarRegistro', cuerpo());
     if (consultarUno('SELECT id FROM usuarios WHERE correo = ?', [$datos['correo']])) {
@@ -26,25 +23,17 @@ ruta('POST', '/auth/registro', function () {
     responder(['usuario' => $usuario], 201);
 });
 
-// Protección contra fuerza bruta: máximo de intentos en una ventana de tiempo.
-// El límite principal es por correo + IP: así un atacante no puede bloquear la
-// cuenta de otra persona que entra desde otro equipo.
-const MAX_INTENTOS_CORREO_IP = 5;  // mismo correo desde el mismo equipo
-const MAX_INTENTOS_IP = 50;        // muchos correos desde un mismo equipo
-const MAX_IPS_POR_CORREO = 10;     // equipos distintos fallando con un mismo correo (ataque distribuido)
+const MAX_INTENTOS_CORREO_IP = 5;
+const MAX_INTENTOS_IP = 50;
+const MAX_IPS_POR_CORREO = 10;
 const MINUTOS_BLOQUEO = 15;
 
-// Hash de una contraseña aleatoria que nadie conoce. Se verifica cuando el correo
-// no existe para que la respuesta tarde lo mismo y no revele qué correos están registrados.
 const HASH_FICTICIO = '$2y$10$XvlAzzPfh6GLwAIAoDn.s.h88Cg8DZiB3CdgT3FDr9MeTEihcW5JC';
 
 ruta('POST', '/auth/login', function () {
     $datos = validar('validarLogin', cuerpo());
     $ip = $_SERVER['REMOTE_ADDR'] ?? 'desconocida';
 
-    // El intento se registra ANTES de revisar la contraseña y luego se cuenta
-    // incluyéndolo. Así, aunque lleguen muchas peticiones al mismo tiempo, cada una
-    // ve también los intentos de las demás y no se puede saltar el límite.
     ejecutar('INSERT INTO intentos_login (correo, ip) VALUES (?, ?)', [$datos['correo'], $ip]);
     $intentoId = ultimoId();
     $intentos = consultarUno(
@@ -58,8 +47,6 @@ ruta('POST', '/auth/login', function () {
     if ((int) $intentos['par'] > MAX_INTENTOS_CORREO_IP
         || (int) $intentos['por_ip'] > MAX_INTENTOS_IP
         || (int) $intentos['ips_correo'] > MAX_IPS_POR_CORREO) {
-        // Un intento rechazado no revisó la contraseña: se borra para que repetir
-        // peticiones bloqueadas no alargue ni agrande el bloqueo.
         ejecutar('DELETE FROM intentos_login WHERE id = ?', [$intentoId]);
         header('Retry-After: ' . MINUTOS_BLOQUEO * 60);
         throw new ErrorApi(429, 'Demasiados intentos fallidos. Espere ' . MINUTOS_BLOQUEO . ' minutos e intente de nuevo.');
@@ -67,13 +54,10 @@ ruta('POST', '/auth/login', function () {
 
     $fila = consultarUno('SELECT id, password_hash FROM usuarios WHERE correo = ?', [$datos['correo']]);
     $valida = password_verify($datos['password'], $fila['password_hash'] ?? HASH_FICTICIO);
-    // El mismo mensaje para correo inexistente o contraseña errada: así no se
-    // revela qué correos están registrados. El intento queda registrado como fallido.
     if (!$fila || !$valida) {
-        ejecutar('DELETE FROM intentos_login WHERE creado_en < NOW() - INTERVAL 1 DAY'); // limpieza
+        ejecutar('DELETE FROM intentos_login WHERE creado_en < NOW() - INTERVAL 1 DAY');
         throw new ErrorApi(401, 'Correo o contraseña incorrectos.');
     }
-    // Entrada correcta: se borran los intentos de este correo desde este equipo
     ejecutar('DELETE FROM intentos_login WHERE correo = ? AND ip = ?', [$datos['correo'], $ip]);
     $usuario = usuarioPublico((int) $fila['id']);
     guardarSesion($usuario);

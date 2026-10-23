@@ -27,7 +27,6 @@ export default defineConfig([
     },
   },
   {
-    // Las pruebas de la API se ejecutan con Node.js, no en el navegador
     files: ['tests/**/*.js'],
     languageOptions: { globals: globals.node },
   },

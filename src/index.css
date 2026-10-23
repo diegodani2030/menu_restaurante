@@ -19,7 +19,6 @@ h1 {
   border-bottom: 3px solid #c8a97e;
 }
 
-/* FILTROS */
 .filtros {
   display: flex;
   justify-content: center;
@@ -49,7 +48,6 @@ h1 {
   color: white !important;
 }
 
-/* MENU */
 .menu {
   display: flex;
   flex-wrap: wrap;
@@ -60,7 +58,6 @@ h1 {
   flex: 1;
 }
 
-/* TARJETA */
 .tarjeta {
   background-color: white;
   border-radius: 12px;
@@ -119,7 +116,6 @@ h1 {
   background-color: #5a2d00;
 }
 
-/* CARRITO */
 .carrito {
   background-color: white;
   border-radius: 12px;
@@ -276,11 +272,6 @@ h1 {
   text-align: center;
 }
 
-/* =====================================================================
-   NUEVAS SECCIONES (navegación, formularios, administración)
-   Usan la misma paleta: café #7b3f00, arena #c8a97e, crema #fdf6ec
-   ===================================================================== */
-
 a { color: #7b3f00; }
 a:hover { color: #5a2d00; }
 
@@ -293,7 +284,6 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
   clip: rect(0 0 0 0); white-space: nowrap;
 }
 
-/* ENCABEZADO Y NAVEGACIÓN */
 .encabezado {
   display: flex;
   align-items: center;
@@ -375,7 +365,6 @@ main { min-height: 70vh; }
   font-size: 0.9rem;
 }
 
-/* CONTENEDORES Y PANELES */
 .contenedor { max-width: 1100px; margin: 0 auto; padding: 30px 20px; }
 .contenedor-angosto { max-width: 480px; }
 .contenedor-medio { max-width: 760px; }
@@ -421,7 +410,6 @@ main { min-height: 70vh; }
 .texto-suave { color: #888; font-size: 0.9rem; margin: 8px 0; }
 .cargando, .vacio { text-align: center; color: #888; padding: 30px 10px; }
 
-/* AVISOS */
 .aviso {
   padding: 12px 16px;
   border-radius: 8px;
@@ -432,7 +420,6 @@ main { min-height: 70vh; }
 .aviso-error { background-color: #fdecea; color: #a8322a; border: 1px solid #e74c3c; }
 .aviso-info  { background-color: #f3e6d3; color: #5a2d00; border: 1px solid #c8a97e; }
 
-/* FORMULARIOS */
 .formulario h2 { text-align: center; }
 
 .campo { display: flex; flex-direction: column; gap: 5px; margin-bottom: 15px; }
@@ -508,7 +495,6 @@ main { min-height: 70vh; }
 }
 .filtros-admin .boton { margin-bottom: 15px; }
 
-/* MENÚ: buscador y tarjetas */
 .filtros { flex-wrap: wrap; }
 
 .buscador { max-width: 420px; margin: 0 auto; padding: 0 20px; }
@@ -526,7 +512,6 @@ main { min-height: 70vh; }
 
 .etiqueta-observaciones { display: block; font-size: 0.85rem; font-weight: bold; margin: 10px 0 5px; }
 
-/* TABLAS */
 .tabla-contenedor { overflow-x: auto; }
 
 .tabla { width: 100%; border-collapse: collapse; background-color: white; font-size: 0.95rem; }
@@ -548,7 +533,6 @@ main { min-height: 70vh; }
 .estado-entregado { background-color: #e8f8ef; color: #1e7a46; }
 .estado-cancelado { background-color: #fdecea; color: #a8322a; }
 
-/* DATOS (listas de descripción) */
 .datos {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -561,7 +545,6 @@ main { min-height: 70vh; }
 .detalle-plato { display: grid; grid-template-columns: 260px 1fr; gap: 24px; }
 .detalle-plato img { width: 100%; height: 220px; object-fit: cover; border-radius: 10px; }
 
-/* REPORTES */
 .indicadores {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -572,7 +555,6 @@ main { min-height: 70vh; }
 .indicador span { display: block; color: #888; font-size: 0.9rem; }
 .indicador strong { font-size: 1.6rem; color: #7b3f00; }
 
-/* NOSOTROS */
 .portada { text-align: center; max-width: 760px; margin: 0 auto 30px; line-height: 1.7; }
 .portada h2 { color: #7b3f00; font-size: 2.2rem; }
 .lema { font-style: italic; color: #a07a4a; font-size: 1.2rem; margin-bottom: 15px; }
@@ -587,9 +569,6 @@ main { min-height: 70vh; }
 .rejilla-valores .panel { margin-bottom: 0; border-top: 4px solid #c8a97e; }
 .rejilla-valores h4 { color: #7b3f00; margin-bottom: 6px; }
 
-/* =====================================================================
-   DISEÑO ADAPTABLE (tabletas y celulares)
-   ===================================================================== */
 @media (max-width: 900px) {
   .contenido { flex-direction: column-reverse; padding: 0 15px; }
   .carrito { position: static; width: 100%; }
@@ -613,7 +592,6 @@ main { min-height: 70vh; }
   .panel { padding: 18px; }
   .detalle-plato { grid-template-columns: 1fr; }
 
-  /* Tablas como tarjetas: cada celda muestra su título */
   .tabla thead { display: none; }
   .tabla, .tabla tbody, .tabla tr, .tabla td { display: block; width: 100%; }
   .tabla tr { border: 1px solid #eee; border-radius: 10px; margin-bottom: 12px; padding: 6px 0; }

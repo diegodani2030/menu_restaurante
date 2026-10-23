@@ -1,8 +1,4 @@
 <?php
-// Validaciones del servidor. Son las mismas reglas de src/utils/validaciones.js:
-// React avisa al usuario antes de enviar, y PHP las vuelve a aplicar porque
-// nunca se confía solo en lo que llega desde el navegador.
-// Cada función devuelve [datos limpios, errores por campo].
 
 const ESTADOS_PEDIDO = ['pendiente', 'en_preparacion', 'entregado', 'cancelado'];
 const REGEX_CORREO = '/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/u';

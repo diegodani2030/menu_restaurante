@@ -1,4 +1,3 @@
-// Campo de formulario con etiqueta, mensaje de error y atributos de accesibilidad.
 function Campo({ etiqueta, nombre, error, tipo = 'text', ayuda, children, ...props }) {
   const idError = error ? `${nombre}-error` : undefined
   const comun = {
