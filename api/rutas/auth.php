@@ -31,7 +31,7 @@ ruta('POST', '/auth/registro', function () {
 // cuenta de otra persona que entra desde otro equipo.
 const MAX_INTENTOS_CORREO_IP = 5;  // mismo correo desde el mismo equipo
 const MAX_INTENTOS_IP = 50;        // muchos correos desde un mismo equipo
-const MAX_INTENTOS_CORREO = 100;   // mismo correo desde muchos equipos (ataque distribuido)
+const MAX_IPS_POR_CORREO = 10;     // equipos distintos fallando con un mismo correo (ataque distribuido)
 const MINUTOS_BLOQUEO = 15;
 
 // Hash de una contraseña aleatoria que nadie conoce. Se verifica cuando el correo
@@ -46,15 +46,21 @@ ruta('POST', '/auth/login', function () {
     // incluyéndolo. Así, aunque lleguen muchas peticiones al mismo tiempo, cada una
     // ve también los intentos de las demás y no se puede saltar el límite.
     ejecutar('INSERT INTO intentos_login (correo, ip) VALUES (?, ?)', [$datos['correo'], $ip]);
+    $intentoId = ultimoId();
     $intentos = consultarUno(
-        'SELECT SUM(correo = ? AND ip = ?) AS par, SUM(ip = ?) AS por_ip, SUM(correo = ?) AS por_correo
+        'SELECT SUM(correo = ? AND ip = ?) AS par,
+                SUM(ip = ?) AS por_ip,
+                COUNT(DISTINCT CASE WHEN correo = ? THEN ip END) AS ips_correo
          FROM intentos_login
          WHERE (correo = ? OR ip = ?) AND creado_en > NOW() - INTERVAL ' . MINUTOS_BLOQUEO . ' MINUTE',
         [$datos['correo'], $ip, $ip, $datos['correo'], $datos['correo'], $ip]
     );
     if ((int) $intentos['par'] > MAX_INTENTOS_CORREO_IP
         || (int) $intentos['por_ip'] > MAX_INTENTOS_IP
-        || (int) $intentos['por_correo'] > MAX_INTENTOS_CORREO) {
+        || (int) $intentos['ips_correo'] > MAX_IPS_POR_CORREO) {
+        // Un intento rechazado no revisó la contraseña: se borra para que repetir
+        // peticiones bloqueadas no alargue ni agrande el bloqueo.
+        ejecutar('DELETE FROM intentos_login WHERE id = ?', [$intentoId]);
         header('Retry-After: ' . MINUTOS_BLOQUEO * 60);
         throw new ErrorApi(429, 'Demasiados intentos fallidos. Espere ' . MINUTOS_BLOQUEO . ' minutos e intente de nuevo.');
     }
