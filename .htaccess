@@ -1,0 +1,11 @@
+# Configuración para Apache (Laragon / XAMPP).
+# Todas las peticiones pasan por api/index.php, que responde la API (/api/...)
+# o entrega el frontend React compilado (dist/). Así ningún archivo interno
+# del proyecto (.env, código PHP, scripts SQL) queda expuesto en el navegador.
+Options -Indexes
+RewriteEngine On
+RewriteRule ^ api/index.php [L,QSA]
+
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>

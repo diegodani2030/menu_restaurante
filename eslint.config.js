@@ -26,4 +26,9 @@ export default defineConfig([
       'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
     },
   },
+  {
+    // Las pruebas de la API se ejecutan con Node.js, no en el navegador
+    files: ['tests/**/*.js'],
+    languageOptions: { globals: globals.node },
+  },
 ])

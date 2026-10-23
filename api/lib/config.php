@@ -1,0 +1,29 @@
+<?php
+// Carga la configuración desde el archivo .env de la raíz del proyecto.
+// Las credenciales nunca se escriben en el código (ver .env.example).
+
+function cargarEnv(string $archivo): void
+{
+    if (!is_file($archivo)) {
+        return;
+    }
+    foreach (file($archivo, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $linea) {
+        $linea = trim($linea);
+        if ($linea === '' || $linea[0] === '#' || !str_contains($linea, '=')) {
+            continue;
+        }
+        [$clave, $valor] = array_map('trim', explode('=', $linea, 2));
+        // Una variable de entorno real del sistema tiene prioridad sobre el archivo
+        if (getenv($clave) === false) {
+            putenv("$clave=$valor");
+        }
+    }
+}
+
+function env(string $clave, string $porDefecto = ''): string
+{
+    $valor = getenv($clave);
+    return $valor === false || $valor === '' ? $porDefecto : $valor;
+}
+
+cargarEnv(dirname(__DIR__, 2) . '/.env');

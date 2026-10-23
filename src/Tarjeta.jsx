@@ -1,4 +1,6 @@
 import {useState} from "react"
+import { precio } from "./utils/formato"
+
 function Tarjeta ({plato, agregarAlCarrito}) {
 
     const [agregado, setAgregado] = useState (false)
@@ -8,21 +10,21 @@ function anima (){
     agregarAlCarrito(plato)
     setAgregado(true)
     setTimeout(() => { setAgregado (false)}, 1000)
-    
+
 
 }
 
     return (
-        <div className="tarjeta">
-            <img src={plato.imagen} alt={plato.nombre}/>
+        <li className="tarjeta">
+            {plato.imagen && <img src={plato.imagen} alt={plato.nombre} loading="lazy"/>}
             <div className="tarjeta-info">
-            <p>Nombre:{plato.nombre}</p>
-            <p>Descripcion:{plato.descripción}</p>
-            <p>Precio:{plato.precio}</p>
-            <p>Categoria:{plato.categoria}</p>
-            <button onClick = {anima}> {agregado ? "agregado" : "agregar orden"}</button>
+            <h3>{plato.nombre}</h3>
+            <p>{plato.descripcion}</p>
+            <p className="etiqueta-categoria">{plato.categoria}</p>
+            <p className="precio">{precio(plato.precio)}</p>
+            <button onClick = {anima}> {agregado ? "Agregado" : "Agregar a la orden"}</button>
             </div>
-        </div>
+        </li>
     )
 }
 

@@ -1,10 +1,15 @@
 {
-  "name": "app-restaurante",
+  "name": "raices-del-fogon",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "api": "php -S 127.0.0.1:3001 api/index.php",
+    "start": "vite build && php -S 127.0.0.1:3001 api/index.php",
+    "db:setup": "php database/instalar.php",
+    "db:setup:demo": "php database/instalar.php --demo",
+    "test:api": "node --env-file=.env --test tests/api.test.js",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
