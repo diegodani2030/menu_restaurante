@@ -107,6 +107,16 @@ test('fuerza bruta: se bloquea el correo tras 5 intentos fallidos', async () => 
   assert.equal(bloqueado.estado, 429, 'ni siquiera la contraseña correcta entra durante el bloqueo')
 })
 
+test('fuerza bruta: peticiones simultáneas no se saltan el límite', async () => {
+  const correo = `simultaneo${marca}@prueba.test`
+  const respuestas = await Promise.all(
+    Array.from({ length: 10 }, () => visitante('POST', '/auth/login', { correo, password: 'incorrecta1' })),
+  )
+  const revisadas = respuestas.filter((r) => r.estado === 401).length
+  assert.ok(revisadas <= 5, `solo 5 intentos pueden revisar la contraseña (fueron ${revisadas})`)
+  assert.equal(respuestas.filter((r) => r.estado === 429).length, 10 - revisadas)
+})
+
 test('permisos: solo el administrador modifica el menú', async () => {
   const plato = { nombre: 'Prueba sin permiso', descripcion: 'No debería guardarse', precio: 1000, categoria_id: 1 }
   assert.equal((await visitante('POST', '/platos', plato)).estado, 401)
