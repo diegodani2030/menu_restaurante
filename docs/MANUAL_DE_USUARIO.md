@@ -226,6 +226,7 @@ Ver las secciones 7.2 y 7.3. Para salir, pulse **Cerrar sesión** en la barra su
 | "Las contraseñas no coinciden." | La confirmación es distinta | Escríbala de nuevo |
 | "Este correo ya está registrado." | Ya existe una cuenta con ese correo | Inicie sesión con esa cuenta |
 | "Correo o contraseña incorrectos." | Los datos de acceso no coinciden | Revise ambos datos |
+| "Demasiados intentos fallidos. Espere 15 minutos e intente de nuevo." | Se escribió mal la contraseña 5 veces seguidas (protección contra ataques) | Espere 15 minutos; al entrar correctamente el contador se reinicia |
 | "El precio debe estar entre $500 y $1.000.000." | Precio fuera de rango | Corrija el valor |
 | "La imagen debe ser una URL que empiece por http:// o https://." | Dirección de imagen inválida | Pegue una URL completa o deje el campo vacío |
 | "Use una foto JPG, PNG o WEBP." / "Formato no permitido…" | El archivo no es una foto en esos formatos (o está dañado) | Elija otra foto o conviértala a JPG |

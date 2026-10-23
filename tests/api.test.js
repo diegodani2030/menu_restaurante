@@ -95,6 +95,18 @@ test('registro e inicio de sesión con validaciones', async () => {
   assert.equal(login.datos.usuario.rol, 'admin')
 })
 
+test('fuerza bruta: se bloquea el correo tras 5 intentos fallidos', async () => {
+  const correo = `bloqueo${marca}@prueba.test`
+  const otro = crearCliente()
+  await otro('POST', '/auth/registro', { nombre: 'Prueba Bloqueo', correo, telefono: '3009998877', password: 'clave1234' })
+
+  for (let i = 0; i < 5; i++) {
+    assert.equal((await visitante('POST', '/auth/login', { correo, password: 'incorrecta1' })).estado, 401)
+  }
+  const bloqueado = await visitante('POST', '/auth/login', { correo, password: 'clave1234' })
+  assert.equal(bloqueado.estado, 429, 'ni siquiera la contraseña correcta entra durante el bloqueo')
+})
+
 test('permisos: solo el administrador modifica el menú', async () => {
   const plato = { nombre: 'Prueba sin permiso', descripcion: 'No debería guardarse', precio: 1000, categoria_id: 1 }
   assert.equal((await visitante('POST', '/platos', plato)).estado, 401)

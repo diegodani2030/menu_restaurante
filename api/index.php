@@ -15,6 +15,7 @@ require __DIR__ . '/lib/validaciones.php';
 require __DIR__ . '/lib/archivos.php';
 
 ini_set('display_errors', '0'); // los errores van al log, nunca a la respuesta
+ini_set('zend.exception_ignore_args', '1'); // las trazas de error no guardan argumentos (p. ej. contraseñas)
 set_error_handler(function (int $nivel, string $mensaje, string $archivo, int $linea) {
     if (!(error_reporting() & $nivel)) {
         return false; // aviso silenciado a propósito con @ (por ejemplo, @getimagesize)

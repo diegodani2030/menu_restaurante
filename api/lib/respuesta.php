@@ -84,6 +84,8 @@ function manejarError(Throwable $error): never
                 responder(['error' => 'La base de datos no está disponible. Intente más tarde.'], 503);
         }
     }
-    error_log('[API] ' . $error);
+    // Solo se registran datos seguros: no la traza completa, que podría incluir
+    // argumentos de funciones como contraseñas.
+    error_log(sprintf('[API] %s: %s en %s:%d', get_class($error), $error->getMessage(), $error->getFile(), $error->getLine()));
     responder(['error' => 'Ocurrió un error inesperado en el servidor.'], 500);
 }

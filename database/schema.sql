@@ -93,6 +93,21 @@ CREATE TABLE IF NOT EXISTS usuarios (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
 
 -- ---------------------------------------------------------------------
+-- intentos_login: intentos fallidos de inicio de sesión. Sirve para frenar
+-- ataques de fuerza bruta (probar muchas contraseñas). No tiene llave
+-- foránea a propósito: también registra correos que no existen.
+-- ---------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS intentos_login (
+  id         INT UNSIGNED  NOT NULL AUTO_INCREMENT,
+  correo     VARCHAR(150)  NOT NULL,
+  ip         VARCHAR(45)   NOT NULL,
+  creado_en  TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT pk_intentos_login PRIMARY KEY (id),
+  INDEX ix_intentos_correo (correo, creado_en),
+  INDEX ix_intentos_ip (ip, creado_en)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
+
+-- ---------------------------------------------------------------------
 -- pedidos: encabezado de cada orden realizada por un usuario.
 -- Relación: usuarios 1 ─── N pedidos
 -- ---------------------------------------------------------------------

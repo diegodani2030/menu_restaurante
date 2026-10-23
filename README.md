@@ -50,6 +50,33 @@ npm run dev
 
 Abra http://localhost:5173. Vite reenvía las peticiones `/api` y `/uploads` a la API PHP (http://127.0.0.1:3001).
 
+## Uso con XAMPP (Apache + MySQL/MariaDB)
+
+Probado con XAMPP 8.2.12. La aplicación debe estar en la raíz del sitio, por eso se publica en un puerto propio:
+
+1. Encienda **MySQL** en el panel de XAMPP. En `.env` use `DB_USER=root` y `DB_PASSWORD=` (vacío).
+2. Instale la base de datos y compile React:
+   ```bash
+   C:\xampp\php\php.exe database\instalar.php --demo
+   ```
+   ```bash
+   npm run build
+   ```
+3. Agregue al final de `C:\xampp\apache\conf\extra\httpd-vhosts.conf` (cambie la ruta por la carpeta del proyecto):
+   ```apache
+   Listen 8080
+   <VirtualHost *:8080>
+       DocumentRoot "C:/ruta/al/proyecto/menu_restaurante"
+       <Directory "C:/ruta/al/proyecto/menu_restaurante">
+           AllowOverride All
+           Require local
+       </Directory>
+   </VirtualHost>
+   ```
+4. Encienda (o reinicie) **Apache** y abra http://localhost:8080. Las tablas se ven en http://localhost/phpmyadmin.
+
+Después de cambiar el código de React, ejecute `npm run build` de nuevo.
+
 ## Fotos de los platos
 
 El administrador puede subir la foto de cada plato (JPG, PNG o WEBP, máximo 2 MB) desde el formulario del plato. Las fotos se guardan en `uploads/platos/` (la carpeta se crea sola, no se sube a git e importa incluirla en las copias de seguridad) y su registro queda en la tabla `archivos`. El límite de 2 MB coincide con el valor por defecto de PHP, así que no hace falta modificar `php.ini`.

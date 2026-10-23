@@ -280,6 +280,15 @@ Lectura de las relaciones:
 | observaciones | VARCHAR(255) | Sí | | Indicaciones del cliente |
 | creado_en | TIMESTAMP | No | DEFAULT CURRENT_TIMESTAMP, índice | Fecha y hora |
 
+**intentos_login** (seguridad; sin llave foránea a propósito, porque también registra correos que no existen)
+
+| Campo | Tipo | Nulo | Clave / restricción | Descripción |
+|---|---|---|---|---|
+| id | INT UNSIGNED | No | PK, AUTO_INCREMENT | Identificador |
+| correo | VARCHAR(150) | No | Índice (correo, creado_en) | Correo con el que se intentó entrar |
+| ip | VARCHAR(45) | No | Índice (ip, creado_en) | Dirección IP de origen |
+| creado_en | TIMESTAMP | No | DEFAULT CURRENT_TIMESTAMP | Fecha del intento fallido (se borran a las 24 h y al entrar correctamente) |
+
 **detalle_pedido**
 
 | Campo | Tipo | Nulo | Clave / restricción | Descripción |
@@ -371,7 +380,9 @@ El archivo también incluye ejemplos de **INSERT, UPDATE y DELETE** dentro de un
 | Acceso indebido | La API verifica la sesión y el rol en cada operación privada; un cliente no puede ver pedidos ajenos (responde 404) |
 | Escalada de privilegios | El registro siempre crea el rol `cliente` |
 | Manipulación de precios | El total del pedido lo calcula el servidor con los precios de la base de datos |
-| Enumeración de usuarios | Un mismo mensaje para "correo no existe" y "contraseña incorrecta" |
+| Enumeración de usuarios | Un mismo mensaje para "correo no existe" y "contraseña incorrecta"; si el correo no existe se verifica igual un hash ficticio, para que la respuesta tarde lo mismo |
+| Fuerza bruta en el inicio de sesión | Tabla `intentos_login`: tras 5 intentos fallidos con un correo (o 50 desde una misma IP) en 15 minutos, la API responde 429 y no deja entrar ni con la contraseña correcta hasta que pase el tiempo |
+| Datos sensibles en los registros | El log guarda solo el tipo de error, el mensaje, el archivo y la línea (no la traza con argumentos); `zend.exception_ignore_args = 1` |
 | Fuga de información técnica | Errores internos solo en el log; al cliente le llega un mensaje genérico; `display_errors = 0` |
 | Secretos en el código | Credenciales en `.env` (ignorado por git); `.env.example` sin valores |
 | Archivos internos expuestos | `api/index.php` solo entrega archivos de `dist/` y fotos cuyo nombre cumple el patrón `uploads/platos/<32 hex>.(jpg\|png\|webp)`; `.htaccess` bloquea archivos ocultos |
@@ -411,11 +422,12 @@ El archivo también incluye ejemplos de **INSERT, UPDATE y DELETE** dentro de un
 | Compilación | `npm run build` | Correcta |
 | Sintaxis PHP | `php -l` en todos los archivos | Sin errores |
 | Instalación de la BD | `npm run db:setup:demo` ejecutado dos veces | Correcta; la segunda vez no duplicó datos |
-| Instalación limpia | `schema.sql` + `seed.sql` en una base vacía | 6 tablas, 5 llaves foráneas y 9 platos |
+| Instalación limpia | `schema.sql` + `seed.sql` en una base vacía | 7 tablas, 5 llaves foráneas y 9 platos |
 | Migración de fotos | `npm run db:setup` sobre la base existente, dos veces | La migración se aplicó una sola vez; platos y pedidos intactos |
-| Pruebas automáticas de la API | `npm run test:api` | **6 de 6 pruebas aprobadas** (consultas públicas, registro e inicio de sesión, permisos, CRUD de platos y categorías, pedidos y reportes, fotos de platos) |
+| Pruebas automáticas de la API | `npm run test:api` | **7 de 7 pruebas aprobadas** (consultas públicas, registro e inicio de sesión, bloqueo por fuerza bruta, permisos, CRUD de platos y categorías, pedidos y reportes, fotos de platos) |
 | Consultas SQL | Ejecución completa de `database/consultas.sql` | Todas sin errores; las 4 sentencias de demostración de integridad fallaron como se esperaba (errores 1452, 1451, 1451 y 3819) |
 | Prueba manual en navegador | Registro inválido y válido, correo repetido, inicio de sesión, orden y pedido, detalle, crear/editar/eliminar plato, eliminar plato vendido (bloqueado), cambiar estado, reportes, cerrar sesión, ruta protegida sin sesión | Correcto; los cambios se verificaron directamente en MySQL |
+| XAMPP 8.2.12 (Apache + MariaDB 10.4) | Instalación de la BD, `consultas.sql`, pruebas automáticas con `API_URL=http://localhost:8080/api` y revisión en el navegador | Correcto: 7 tablas, 5 llaves, 7 de 7 pruebas; `.env` y `.htaccess` responden 403. En MariaDB el error de CHECK es el 4025 (en MySQL, 3819) |
 | Subida de fotos en navegador | Archivo que no es imagen (rechazado en el navegador), crear plato con foto (vista previa, guardado, foto visible en el menú), quitar foto subida (vuelve la URL externa) | Correcto; sin archivos ni registros huérfanos al terminar |
 | Dependencias | `npm audit` | 0 vulnerabilidades (después de `npm audit fix`) |
 | Vista móvil | Navegador con 375 × 812 px: menú, botón de navegación, tablas | Correcto |
@@ -428,12 +440,12 @@ Durante las pruebas se corrigieron cuatro errores: campos de formulario que se b
 ## 16. Limitaciones conocidas
 
 - La misión, visión, objetivos y valores son una **propuesta** que el equipo debe validar. Los **datos de contacto** del restaurante están pendientes.
-- No hay recuperación de contraseña ni límite de intentos de inicio de sesión.
+- No hay recuperación de contraseña.
 - Las fotos subidas no se redimensionan ni se comprimen: se guardan tal como llegan (máximo 2 MB).
 - En el navegador integrado de pruebas la foto se cargó generando la imagen desde la página, porque esa herramienta no puede abrir el selector de archivos del sistema operativo; el envío al servidor es el mismo que al elegirla manualmente.
 - No hay pagos en línea ni domicilios; el pedido queda registrado para que el restaurante lo gestione.
 - Solo existe un administrador inicial. Para crear otro, cambie el rol de un usuario directamente en MySQL.
-- Se probó con MySQL 8.4 y PHP 8.3 usando el servidor integrado de PHP. **No se probó** con MariaDB (la base de datos de XAMPP) ni detrás de Apache con el archivo `.htaccess`.
+- Se probó en dos entornos: MySQL 8.4 + PHP 8.3 con el servidor integrado de PHP, y XAMPP 8.2.12 (Apache 2.4 + MariaDB 10.4.32 + PHP 8.2.12). No se probó en un servidor de hosting público.
 - Para usar la cookie de sesión con `Secure` se requiere HTTPS en producción.
 
 ## Referencias

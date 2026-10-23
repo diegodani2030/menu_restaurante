@@ -4,7 +4,7 @@
 # del proyecto (.env, código PHP, scripts SQL) queda expuesto en el navegador.
 Options -Indexes
 RewriteEngine On
-RewriteRule ^ api/index.php [L,QSA]
+RewriteRule ^ api/index.php [END,QSA]
 
 <FilesMatch "^\.">
     Require all denied

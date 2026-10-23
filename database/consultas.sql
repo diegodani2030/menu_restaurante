@@ -180,7 +180,7 @@ ROLLBACK;
 -- 6.3 Borrar un plato que ya fue vendido → Error 1451 (fk_detalle_plato)
 -- DELETE FROM platos WHERE id = (SELECT plato_id FROM (SELECT plato_id FROM detalle_pedido LIMIT 1) AS t);
 
--- 6.4 Cantidad fuera de rango → Error 3819 (ck_detalle_cantidad)
+-- 6.4 Cantidad fuera de rango → Error 3819 en MySQL / 4025 en MariaDB (ck_detalle_cantidad)
 -- INSERT INTO detalle_pedido (pedido_id, plato_id, cantidad, precio_unitario) VALUES (1, 1, 0, 8000);
 
 -- 6.5 Ver todas las llaves foráneas del esquema
